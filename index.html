@@ -15,7 +15,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             overflow: hidden;
             color: #ffffff;
             position: relative;
@@ -87,59 +87,74 @@
             display: inline-block;
             margin-top: 10px;
         }
-        /* Electric Circuit Background */
-        .circuit {
+
+        /* Electric Rain Background */
+        .electric-rain {
             position: absolute;
             top: 0;
             left: 0;
-            width: 200%;
-            height: 200%;
-            background: repeating-radial-gradient(circle, transparent, transparent 10px, #ff4d4d1a 10px, #ff4d4d1a 20px),
-                        repeating-linear-gradient(90deg, transparent, transparent 5px, #ff4d4d1a 5px, #ff4d4d1a 10px);
-            animation: moveCircuit 15s infinite linear;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             z-index: -1;
         }
-        @keyframes moveCircuit {
-            from {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            to {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-        /* Centered Glow Circle */
-        .glow-circle {
+        .raindrop {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(255, 77, 77, 0.6), transparent);
-            border-radius: 50%;
-            z-index: 1;
-            opacity: 0.8;
-            animation: pulse 3s infinite ease-in-out;
+            width: 4px;
+            height: 40px;
+            background: linear-gradient(to bottom, #ff4d4d, rgba(255, 77, 77, 0.8));
+            filter: blur(2px);
+            animation: fall linear infinite;
         }
-        @keyframes pulse {
+        .raindrop:nth-child(1) { top: -20%; left: 5%; animation-duration: 1.5s; }
+        .raindrop:nth-child(2) { top: -40%; left: 15%; animation-duration: 2s; }
+        .raindrop:nth-child(3) { top: -60%; left: 25%; animation-duration: 1.8s; }
+        .raindrop:nth-child(4) { top: -80%; left: 35%; animation-duration: 2.2s; }
+        .raindrop:nth-child(5) { top: -10%; left: 45%; animation-duration: 1.7s; }
+        .raindrop:nth-child(6) { top: -30%; left: 55%; animation-duration: 2.5s; }
+        .raindrop:nth-child(7) { top: -50%; left: 65%; animation-duration: 2s; }
+        .raindrop:nth-child(8) { top: -70%; left: 75%; animation-duration: 1.9s; }
+        .raindrop:nth-child(9) { top: -90%; left: 85%; animation-duration: 2.3s; }
+        .raindrop:nth-child(10) { top: -100%; left: 95%; animation-duration: 2.1s; }
+        @keyframes fall {
             0% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.8;
-            }
-            50% {
-                transform: translate(-50%, -50%) scale(1.1);
+                transform: translateY(0);
                 opacity: 1;
             }
             100% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 0.8;
+                transform: translateY(120vh);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 500px) {
+            h1 {
+                font-size: 26px;
+            }
+            label {
+                font-size: 16px;
+            }
+            input[type="text"], input[type="password"], button {
+                font-size: 14px;
+                padding: 12px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="circuit"></div>
-    <div class="glow-circle"></div>
+    <div class="electric-rain">
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+        <div class="raindrop"></div>
+    </div>
     <div class="container">
         <h1>تسجيل الدخول</h1>
         <label for="username">اسم المستخدم:</label>
