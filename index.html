@@ -284,4 +284,18 @@
                     renderUsers();
                 }
             } catch (error) {
-                console.error("
+                console.error("Error deleting user:", error);
+                alert("حصل خطأ أثناء حذف المستخدم.");
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            showLoginPage();
+        }
+
+        // بدء تشغيل الصفحة
+        showLoginPage();
+    </script>
+</body>
+</html>
