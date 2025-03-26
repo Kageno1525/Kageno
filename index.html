@@ -135,15 +135,25 @@
         <button onclick="logout()">تسجيل الخروج</button>
     </div>
 
-    <script>
-        // تخزين البيانات في localStorage
-        let users = JSON.parse(localStorage.getItem('users')) || [];
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js";
 
-        // إضافة حساب الـ Admin إذا كان غير موجود
-        if (!users.some(u => u.username === "viruse")) {
-            users.push({ username: "viruse", password: "1525", status: "active" });
-            localStorage.setItem('users', JSON.stringify(users));
-        }
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAc1cUpxDMNL1QDkw3UMxmjj9tWV59gU6k",
+            authDomain: "kageno-32e2b.firebaseapp.com",
+            projectId: "kageno-32e2b",
+            storageBucket: "kageno-32e2b.firebasestorage.app",
+            messagingSenderId: "906799471443",
+            appId: "1:906799471443:web:8d27463f43577578f89fa6",
+            measurementId: "G-CPK1CMTSGH"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         // عرض الصفحة المناسبة
         function showLoginPage() {
@@ -176,102 +186,80 @@
         }
 
         // تسجيل الدخول
-        function login() {
+        async function login() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
-            const outputDiv = document.getElementById('output');
 
-            const user = users.find(u => u.username === username && u.password === password);
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            const user = usersSnapshot.docs.find(doc => doc.data().username === username && doc.data().password === password);
 
             if (user) {
-                if (user.status === 'blocked') {
-                    outputDiv.innerHTML = '<span style="color: red;">خطأ: هذا الحساب محظور!</span>';
+                if (user.data().status === 'blocked') {
+                    alert("هذا الحساب محظور!");
                     return;
                 }
                 if (username === "viruse" && password === "1525") {
-                    showAdminPage(); // تحويل للوحة الإدارة
+                    showAdminPage();
                 } else {
-                    showWelcomePage(); // تحويل لصفحة الترحيب
+                    showWelcomePage();
                 }
             } else {
-                outputDiv.innerHTML = '<span style="color: red;">خطأ: اسم المستخدم أو كلمة المرور غير صحيحة!</span>';
+                alert("خطأ: اسم المستخدم أو كلمة المرور غير صحيحة!");
             }
         }
 
         // تسجيل حساب جديد
-        function register() {
+        async function register() {
             const newUsername = document.getElementById('newUsername').value.trim();
             const newPassword = document.getElementById('newPassword').value.trim();
-            const registerOutput = document.getElementById('registerOutput');
 
             if (!newUsername || !newPassword) {
-                registerOutput.innerHTML = '<span style="color: red;">يرجى إدخال اسم المستخدم وكلمة المرور!</span>';
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
                 return;
             }
 
-            if (users.some(u => u.username === newUsername)) {
-                registerOutput.innerHTML = '<span style="color: red;">اسم المستخدم مستخدم بالفعل!</span>';
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            const userExists = usersSnapshot.docs.some(doc => doc.data().username === newUsername);
+
+            if (userExists) {
+                alert("اسم المستخدم مستخدم بالفعل!");
                 return;
             }
 
-            users.push({ username: newUsername, password: newPassword, status: 'active' });
-            localStorage.setItem('users', JSON.stringify(users));
-            registerOutput.innerHTML = '<span style="color: green;">تم تسجيل الحساب بنجاح!</span>';
+            await addDoc(collection(db, "users"), { username: newUsername, password: newPassword, status: "active" });
+            alert("تم تسجيل الحساب بنجاح!");
         }
 
         // لوحة الإدارة
-        function renderUsers() {
+        async function renderUsers() {
             const userList = document.getElementById('userList');
             userList.innerHTML = '';
-            users.forEach((user, index) => {
+
+            const usersSnapshot = await getDocs(collection(db, "users"));
+            usersSnapshot.forEach((docElement) => {
+                const user = docElement.data();
                 const li = document.createElement('li');
                 li.innerHTML = `
                     اسم المستخدم: ${user.username} 
                     <span class="status">${user.status}</span>
-                    <button onclick="editUser(${index})">تعديل</button>
-                    <button onclick="blockUser(${index})">${user.status === 'active' ? 'حظر' : 'رفع الحظر'}</button>
-                    <button onclick="deleteUser(${index})">حذف</button>
+                    <button onclick="blockUser('${docElement.id}')">${user.status === 'active' ? 'حظر' : 'رفع الحظر'}</button>
+                    <button onclick="deleteUser('${docElement.id}')">حذف</button>
                 `;
                 userList.appendChild(li);
             });
         }
 
-        function addUser() {
-            const username = prompt("أدخل اسم المستخدم الجديد:");
-            const password = prompt("أدخل كلمة المرور الجديدة:");
-
-            if (username && password) {
-                users.push({ username, password, status: 'active' });
-                localStorage.setItem('users', JSON.stringify(users));
-                renderUsers();
-            } else {
-                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
-            }
-        }
-
-        function editUser(index) {
-            const newUsername = prompt("أدخل اسم المستخدم الجديد:", users[index].username);
-            const newPassword = prompt("أدخل كلمة المرور الجديدة:", users[index].password);
-
-            if (newUsername && newPassword) {
-                users[index] = { username: newUsername, password: newPassword, status: users[index].status };
-                localStorage.setItem('users', JSON.stringify(users));
-                renderUsers();
-            } else {
-                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
-            }
-        }
-
-        function blockUser(index) {
-            users[index].status = users[index].status === 'active' ? 'blocked' : 'active';
-            localStorage.setItem('users', JSON.stringify(users));
+        async function blockUser(id) {
+            const userRef = doc(db, "users", id);
+            const userSnapshot = await getDoc(userRef);
+            const status = userSnapshot.data().status === 'active' ? 'blocked' : 'active';
+            await updateDoc(userRef, { status });
             renderUsers();
         }
 
-        function deleteUser(index) {
+        async function deleteUser(id) {
             if (confirm("هل تريد حذف هذا المستخدم؟")) {
-                users.splice(index, 1);
-                localStorage.setItem('users', JSON.stringify(users));
+                await deleteDoc(doc(db, "users", id));
                 renderUsers();
             }
         }
