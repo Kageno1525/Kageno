@@ -190,21 +190,26 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value.trim();
 
-            const usersSnapshot = await getDocs(collection(db, "users"));
-            const user = usersSnapshot.docs.find(doc => doc.data().username === username && doc.data().password === password);
+            try {
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                const user = usersSnapshot.docs.find(doc => doc.data().username === username && doc.data().password === password);
 
-            if (user) {
-                if (user.data().status === 'blocked') {
-                    alert("هذا الحساب محظور!");
-                    return;
-                }
-                if (username === "viruse" && password === "1525") {
-                    showAdminPage();
+                if (user) {
+                    if (user.data().status === 'blocked') {
+                        alert("هذا الحساب محظور!");
+                        return;
+                    }
+                    if (username === "viruse" && password === "1525") {
+                        showAdminPage();
+                    } else {
+                        showWelcomePage();
+                    }
                 } else {
-                    showWelcomePage();
+                    alert("خطأ: اسم المستخدم أو كلمة المرور غير صحيحة!");
                 }
-            } else {
-                alert("خطأ: اسم المستخدم أو كلمة المرور غير صحيحة!");
+            } catch (error) {
+                console.error("Error during login:", error);
+                alert("حصل خطأ أثناء تسجيل الدخول. تأكد من الإنترنت أو Firebase.");
             }
         }
 
@@ -218,16 +223,21 @@
                 return;
             }
 
-            const usersSnapshot = await getDocs(collection(db, "users"));
-            const userExists = usersSnapshot.docs.some(doc => doc.data().username === newUsername);
+            try {
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                const userExists = usersSnapshot.docs.some(doc => doc.data().username === newUsername);
 
-            if (userExists) {
-                alert("اسم المستخدم مستخدم بالفعل!");
-                return;
+                if (userExists) {
+                    alert("اسم المستخدم مستخدم بالفعل!");
+                    return;
+                }
+
+                await addDoc(collection(db, "users"), { username: newUsername, password: newPassword, status: "active" });
+                alert("تم تسجيل الحساب بنجاح!");
+            } catch (error) {
+                console.error("Error during registration:", error);
+                alert("حصل خطأ أثناء تسجيل الحساب. تأكد من الإنترنت أو Firebase.");
             }
-
-            await addDoc(collection(db, "users"), { username: newUsername, password: newPassword, status: "active" });
-            alert("تم تسجيل الحساب بنجاح!");
         }
 
         // لوحة الإدارة
@@ -235,42 +245,43 @@
             const userList = document.getElementById('userList');
             userList.innerHTML = '';
 
-            const usersSnapshot = await getDocs(collection(db, "users"));
-            usersSnapshot.forEach((docElement) => {
-                const user = docElement.data();
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    اسم المستخدم: ${user.username} 
-                    <span class="status">${user.status}</span>
-                    <button onclick="blockUser('${docElement.id}')">${user.status === 'active' ? 'حظر' : 'رفع الحظر'}</button>
-                    <button onclick="deleteUser('${docElement.id}')">حذف</button>
-                `;
-                userList.appendChild(li);
-            });
-        }
-
-        async function blockUser(id) {
-            const userRef = doc(db, "users", id);
-            const userSnapshot = await getDoc(userRef);
-            const status = userSnapshot.data().status === 'active' ? 'blocked' : 'active';
-            await updateDoc(userRef, { status });
-            renderUsers();
-        }
-
-        async function deleteUser(id) {
-            if (confirm("هل تريد حذف هذا المستخدم؟")) {
-                await deleteDoc(doc(db, "users", id));
-                renderUsers();
+            try {
+                const usersSnapshot = await getDocs(collection(db, "users"));
+                usersSnapshot.forEach((docElement) => {
+                    const user = docElement.data();
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        اسم المستخدم: ${user.username} 
+                        <span class="status">${user.status}</span>
+                        <button onclick="blockUser('${docElement.id}')">${user.status === 'active' ? 'حظر' : 'رفع الحظر'}</button>
+                        <button onclick="deleteUser('${docElement.id}')">حذف</button>
+                    `;
+                    userList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error fetching users:", error);
+                alert("حصل خطأ أثناء جلب بيانات المستخدمين.");
             }
         }
 
-        // تسجيل الخروج
-        function logout() {
-            showLoginPage();
+        async function blockUser(id) {
+            try {
+                const userRef = doc(db, "users", id);
+                const userSnapshot = await getDoc(userRef);
+                const status = userSnapshot.data().status === 'active' ? 'blocked' : 'active';
+                await updateDoc(userRef, { status });
+                renderUsers();
+            } catch (error) {
+                console.error("Error blocking user:", error);
+                alert("حصل خطأ أثناء تحديث حالة المستخدم.");
+            }
         }
 
-        // بدء تشغيل الصفحة
-        showLoginPage();
-    </script>
-</body>
-</html>
+        async function deleteUser(id) {
+            try {
+                if (confirm("هل تريد حذف هذا المستخدم؟")) {
+                    await deleteDoc(doc(db, "users", id));
+                    renderUsers();
+                }
+            } catch (error) {
+                console.error("
