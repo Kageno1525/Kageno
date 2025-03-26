@@ -18,7 +18,6 @@
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
             color: #ffffff;
             position: relative;
-            overflow: hidden;
         }
         .container {
             background-color: rgba(255, 255, 255, 0.05);
@@ -89,60 +88,9 @@
         .hidden {
             display: none;
         }
-        /* Electric Rain Background */
-        .electric-rain {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-        .raindrop {
-            position: absolute;
-            width: 4px;
-            height: 40px;
-            background: linear-gradient(to bottom, #ff4d4d, rgba(255, 77, 77, 0.8));
-            filter: blur(2px);
-            animation: fall linear infinite;
-        }
-        .raindrop:nth-child(1) { top: -20%; left: 5%; animation-duration: 1.5s; }
-        .raindrop:nth-child(2) { top: -40%; left: 15%; animation-duration: 2s; }
-        .raindrop:nth-child(3) { top: -60%; left: 25%; animation-duration: 1.8s; }
-        .raindrop:nth-child(4) { top: -80%; left: 35%; animation-duration: 2.2s; }
-        .raindrop:nth-child(5) { top: -10%; left: 45%; animation-duration: 1.7s; }
-        .raindrop:nth-child(6) { top: -30%; left: 55%; animation-duration: 2.5s; }
-        .raindrop:nth-child(7) { top: -50%; left: 65%; animation-duration: 2s; }
-        .raindrop:nth-child(8) { top: -70%; left: 75%; animation-duration: 1.9s; }
-        .raindrop:nth-child(9) { top: -90%; left: 85%; animation-duration: 2.3s; }
-        .raindrop:nth-child(10) { top: -100%; left: 95%; animation-duration: 2.1s; }
-        @keyframes fall {
-            0% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(120vh);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="electric-rain">
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-        <div class="raindrop"></div>
-    </div>
-
     <!-- الصفحة الرئيسية -->
     <div id="loginPage" class="container">
         <h1>تسجيل الدخول</h1>
@@ -287,3 +235,48 @@
             const password = prompt("أدخل كلمة المرور الجديدة:");
 
             if (username && password) {
+                users.push({ username, password, status: 'active' });
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            } else {
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
+            }
+        }
+
+        function editUser(index) {
+            const newUsername = prompt("أدخل اسم المستخدم الجديد:", users[index].username);
+            const newPassword = prompt("أدخل كلمة المرور الجديدة:", users[index].password);
+
+            if (newUsername && newPassword) {
+                users[index] = { username: newUsername, password: newPassword, status: users[index].status };
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            } else {
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
+            }
+        }
+
+        function blockUser(index) {
+            users[index].status = users[index].status === 'active' ? 'blocked' : 'active';
+            localStorage.setItem('users', JSON.stringify(users));
+            renderUsers();
+        }
+
+        function deleteUser(index) {
+            if (confirm("هل تريد حذف هذا المستخدم؟")) {
+                users.splice(index, 1);
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            showLoginPage();
+        }
+
+        // بدء تشغيل الصفحة
+        showLoginPage();
+    </script>
+</body>
+</html>
