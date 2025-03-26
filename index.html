@@ -140,8 +140,8 @@
         let users = JSON.parse(localStorage.getItem('users')) || [];
 
         // إضافة حساب الـ Admin إذا كان غير موجود
-        if (!users.some(u => u.username === "kageno")) {
-            users.push({ username: "kageno", password: "ahmed123", status: "active" });
+        if (!users.some(u => u.username === "viruse")) {
+            users.push({ username: "viruse", password: "1525", status: "active" });
             localStorage.setItem('users', JSON.stringify(users));
         }
 
@@ -188,7 +188,7 @@
                     outputDiv.innerHTML = '<span style="color: red;">خطأ: هذا الحساب محظور!</span>';
                     return;
                 }
-                if (username === "kageno" && password === "ahmed123") {
+                if (username === "viruse" && password === "1525") {
                     showAdminPage(); // تحويل للوحة الإدارة
                 } else {
                     showWelcomePage(); // تحويل لصفحة الترحيب
