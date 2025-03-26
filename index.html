@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الحسابات</title>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            direction: rtl;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #ffffff;
+            position: relative;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            text-align: right;
+            z-index: 2;
+            position: relative;
+        }
+        h1 {
+            color: #ff4d4d;
+            font-size: 32px;
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #ff4d4d;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        button {
+            background: linear-gradient(135deg, #ff4d4d, #ff7e5f);
+            color: #ffffff;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        #output {
+            margin-top: 30px;
+            font-size: 18px;
+            min-height: 50px;
+            color: #ff4d4d;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- الصفحة الرئيسية -->
+    <div id="loginPage" class="container">
+        <h1>تسجيل الدخول</h1>
+        <label for="username">اسم المستخدم:</label>
+        <input type="text" id="username" placeholder="أدخل اسم المستخدم">
+        
+        <label for="password">كلمة المرور:</label>
+        <input type="password" id="password" placeholder="أدخل كلمة المرور">
+        
+        <button onclick="login()">دخول</button>
+        <p>ليس لديك حساب؟ <button onclick="showRegisterPage()">سجل الآن</button></p>
+        
+        <div id="output"></div>
+    </div>
+
+    <!-- صفحة تسجيل الحساب الجديد -->
+    <div id="registerPage" class="container hidden">
+        <h1>تسجيل حساب جديد</h1>
+        <label for="newUsername">اسم المستخدم:</label>
+        <input type="text" id="newUsername" placeholder="اختر اسم مستخدم">
+        
+        <label for="newPassword">كلمة المرور:</label>
+        <input type="password" id="newPassword" placeholder="اختر كلمة مرور">
+        
+        <button onclick="register()">تسجيل</button>
+        <p>لديك حساب بالفعل؟ <button onclick="showLoginPage()">سجل الدخول</button></p>
+        
+        <div id="registerOutput"></div>
+    </div>
+
+    <!-- لوحة الإدارة -->
+    <div id="adminPage" class="container hidden">
+        <h1>لوحة الإدارة</h1>
+        <button onclick="addUser()">إضافة مستخدم جديد</button>
+        <ul id="userList"></ul>
+    </div>
+
+    <!-- صفحة الترحيب -->
+    <div id="welcomePage" class="container hidden">
+        <h1>مرحبًا بك!</h1>
+        <p>لقد تم تسجيل الدخول بنجاح.</p>
+        <button onclick="logout()">تسجيل الخروج</button>
+    </div>
+
+    <script>
+        // تخزين البيانات في localStorage
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // عرض الصفحة المناسبة
+        function showLoginPage() {
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+            document.getElementById('welcomePage').classList.add('hidden');
+        }
+
+        function showRegisterPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.remove('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+            document.getElementById('welcomePage').classList.add('hidden');
+        }
+
+        function showAdminPage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.remove('hidden');
+            document.getElementById('welcomePage').classList.add('hidden');
+            renderUsers();
+        }
+
+        function showWelcomePage() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('registerPage').classList.add('hidden');
+            document.getElementById('adminPage').classList.add('hidden');
+            document.getElementById('welcomePage').classList.remove('hidden');
+        }
+
+        // تسجيل الدخول
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const outputDiv = document.getElementById('output');
+
+            const user = users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                if (username === "kageno" && password === "ahmed123") {
+                    showAdminPage(); // تحويل للوحة الإدارة
+                } else {
+                    showWelcomePage(); // تحويل لصفحة الترحيب
+                }
+            } else {
+                outputDiv.innerHTML = '<span style="color: red;">خطأ: اسم المستخدم أو كلمة المرور غير صحيحة!</span>';
+            }
+        }
+
+        // تسجيل حساب جديد
+        function register() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const registerOutput = document.getElementById('registerOutput');
+
+            if (!newUsername || !newPassword) {
+                registerOutput.innerHTML = '<span style="color: red;">يرجى إدخال اسم المستخدم وكلمة المرور!</span>';
+                return;
+            }
+
+            if (users.some(u => u.username === newUsername)) {
+                registerOutput.innerHTML = '<span style="color: red;">اسم المستخدم مستخدم بالفعل!</span>';
+                return;
+            }
+
+            users.push({ username: newUsername, password: newPassword });
+            localStorage.setItem('users', JSON.stringify(users));
+            registerOutput.innerHTML = '<span style="color: green;">تم تسجيل الحساب بنجاح!</span>';
+        }
+
+        // لوحة الإدارة
+        function renderUsers() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            users.forEach((user, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    اسم المستخدم: ${user.username} 
+                    <button onclick="editUser(${index})">تعديل</button>
+                    <button onclick="deleteUser(${index})">حذف</button>
+                `;
+                userList.appendChild(li);
+            });
+        }
+
+        function addUser() {
+            const username = prompt("أدخل اسم المستخدم الجديد:");
+            const password = prompt("أدخل كلمة المرور الجديدة:");
+
+            if (username && password) {
+                users.push({ username, password });
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            } else {
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
+            }
+        }
+
+        function editUser(index) {
+            const newUsername = prompt("أدخل اسم المستخدم الجديد:", users[index].username);
+            const newPassword = prompt("أدخل كلمة المرور الجديدة:", users[index].password);
+
+            if (newUsername && newPassword) {
+                users[index] = { username: newUsername, password: newPassword };
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            } else {
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور!");
+            }
+        }
+
+        function deleteUser(index) {
+            if (confirm("هل تريد حذف هذا المستخدم؟")) {
+                users.splice(index, 1);
+                localStorage.setItem('users', JSON.stringify(users));
+                renderUsers();
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            showLoginPage();
+        }
+
+        // بدء تشغيل الصفحة
+        showLoginPage();
+    </script>
+</body>
+</html>
