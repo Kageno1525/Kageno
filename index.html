@@ -139,6 +139,12 @@
         // تخزين البيانات في localStorage
         let users = JSON.parse(localStorage.getItem('users')) || [];
 
+        // إضافة حساب الـ Admin إذا كان غير موجود
+        if (!users.some(u => u.username === "kageno")) {
+            users.push({ username: "kageno", password: "ahmed123", status: "active" });
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
         // عرض الصفحة المناسبة
         function showLoginPage() {
             document.getElementById('loginPage').classList.remove('hidden');
